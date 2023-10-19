@@ -8,7 +8,10 @@ import openai
 
 load_dotenv()
 
+st.set_page_config(layout="wide")
+
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+openai.api_key = OPENAI_API_KEY
 
 def get_response(query, target_language, target_audience):
     system_message = """
@@ -34,9 +37,9 @@ def get_response(query, target_language, target_audience):
 
     TRANSLATED TEXT:
     """
-
+    model_name = "gpt-4" if st.session_state.get("use_gpt4") else "gpt-3.5-turbo"
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model=model_name,
         messages=[{"role": "system", "content": system_message},
                 {"role": "user", "content": final_prompt}
     ])
@@ -49,20 +52,22 @@ def get_response(query, target_language, target_audience):
     return translated_text
 
 
-
-
 def translate(inp_text, target_language, target_audience):
-    with st.spinner(text="Translating.."):
-        time.sleep(2)
-        translated_text = get_response(inp_text, target_language, target_audience)
-        # translated_text = "hello world"
+    if input_text.strip():
+        with st.spinner(text="Translating.."):
+            time.sleep(2)
+            translated_text = get_response(inp_text, target_language, target_audience)
+            # translated_text = "hello world"
 
-        st.session_state.output_text = translated_text
+            st.session_state.output_text = translated_text
+
 
 
 if __name__ == "__main__":
 
     st.title("Localization Engine")
+
+    is_gpt4 = st.checkbox("Use GPT-4", key="use_gpt4")
 
     col1, col2 = st.columns(2)
     # List of the most common languages in India
